@@ -3,3 +3,4 @@
 .gcc-flags.json
 table-calc
 src/table.c
+src/config.h
