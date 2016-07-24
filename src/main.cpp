@@ -24,32 +24,19 @@ void setup(void)
   Serial.println();
   Serial.println("Initializing...");
 
-  // this resets all the neopixels to an off state
-  strip.Begin();
-  strip.Show();
-
   Serial.println("Connecting to wifi...");
   WiFi.begin(APNAME, PASSWORD);
-  int idx = 0;
+
   while (!WiFi.isConnected()) {
-    strip.SetPixelColor(idx, black);
-    idx = (idx + 1) % PIXEL_COUNT;
-    strip.SetPixelColor(idx, green);
-    strip.Show();
-    delay(1000);
+    delay(10);
   }
 
   configTime(3 * 3600, 0 * 3600, NTPSERVER);
 
   Serial.println("Waiting for time to synchronize...");
   while (time(NULL) < 3600) {
-    strip.SetPixelColor(idx, black);
-    idx = (idx + 1) % PIXEL_COUNT;
-    strip.SetPixelColor(idx, green);
-    strip.Show();
-    delay(1000);
+    delay(10);
   }
-  strip.SetPixelColor(idx, black);
 
   Serial.println("Running...");
 }
@@ -73,8 +60,10 @@ void loop(void)
   Serial.print(' ');
   Serial.println(minute_idx);
 
-  strip.ClearTo(black);
+  // this resets all the neopixels to an off state
+  strip.Begin();
 
+  // Now set the pixels we want
   if (hour_idx == minute_idx) {
           strip.SetPixelColor(hour_idx, red_blue);
   } else {
