@@ -84,5 +84,11 @@ void loop(void)
   strip.Show();
 
   int time_diff = minute_idx_tbl[minute].time_to_sleep - (t%60);
-  delay(time_diff * 1000);
+  Serial.print("Sleep for ");
+  Serial.print(time_diff);
+  Serial.println(" seconds");
+
+  delay(2);
+  ESP.deepSleep(time_diff * 1000 * 1040); // Add 4% to compensate for deep sleep time inaccuracy
+  delay(10);
 }
