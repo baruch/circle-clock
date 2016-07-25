@@ -2,6 +2,8 @@
 #include <NeoPixelBus.h>
 #include <ESP8266WiFi.h>
 #include <time.h>
+#include <DS3232RTC.h>
+#include <Wire.h>
 
 #include "config.h"
 #include "table.c"
@@ -18,24 +20,37 @@ RgbColor white(colorSaturation);
 RgbColor black(0);
 RgbColor red_blue(colorSaturation, 0, colorSaturation);
 
+bool rtc_active = false;
+
 void setup(void)
 {
   Serial.begin(115200);
   Serial.println();
   Serial.println("Initializing...");
+  Wire.begin(0, 12);
 
-  Serial.println("Connecting to wifi...");
-  WiFi.begin(APNAME, PASSWORD);
+  time_t t = RTC.get();
+  if (t > 3600) {
+          Serial.println("RTC already set");
+          rtc_active = true;
+  } else {
+          Serial.println("Connecting to wifi...");
+          WiFi.begin(APNAME, PASSWORD);
 
-  while (!WiFi.isConnected()) {
-    delay(10);
-  }
+          while (!WiFi.isConnected()) {
+                  delay(10);
+          }
 
-  configTime(3 * 3600, 0 * 3600, NTPSERVER);
+          configTime(3 * 3600, 0 * 3600, NTPSERVER);
 
-  Serial.println("Waiting for time to synchronize...");
-  while (time(NULL) < 3600) {
-    delay(10);
+          Serial.println("Waiting for time to synchronize...");
+          while (time(NULL) < 3600) {
+                  delay(10);
+          }
+
+          int ret = RTC.set(time(NULL));
+          if (ret == 0)
+                  rtc_active = true;
   }
 
   Serial.println("Running...");
@@ -43,7 +58,7 @@ void setup(void)
 
 void loop(void)
 {
-  time_t t = time(NULL);
+  time_t t = rtc_active ? RTC.get() : time(NULL);
   int minute = (t / 60) % 60;
   int hour = (t / 3600) % 12;
 
